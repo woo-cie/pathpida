@@ -22,60 +22,71 @@ describe('cli test', () => {
     spyLog.mockRestore();
   });
 
-  test('main', async () => {
-    for (const project of projects) {
-      if (nodeVer < project.nodeVer) continue;
+  describe('main', () => {
+    describe.each(projects)('%s', (_, baseProject, variables) => {
+      if (nodeVer < baseProject.nodeVer) return;
 
-      resetCache();
+      test.each(variables)('%s', async (_, variable) => {
+        const project = { ...baseProject, ...variable };
+        resetCache();
 
-      const workingDir = path.join(process.cwd(), 'projects', project.dir);
-      const { type, input, staticDir, output, ignorePath, trailingSlash, pageExtensions, appDir } =
-        await getConfig(
+        const workingDir = path.join(process.cwd(), 'projects', project.dir);
+        const {
+          type,
+          input,
+          staticDir,
+          output,
+          ignorePath,
+          trailingSlash,
+          pageExtensions,
+          appDir
+        } = await getConfig(
           project.enableStatic,
           project.output && path.join(workingDir, project.output),
           project.ignorePath,
           workingDir
         );
 
-      const result = fs.readFileSync(`${output}/$path.ts`, 'utf8');
-      const basepath = /-basepath$/.test(project.dir) ? '/foo/bar' : undefined;
-      const { filePath, text } = build(
-        type === 'nextjs'
-          ? {
-              type,
-              input,
-              staticDir,
-              output,
-              ignorePath,
-              pageExtensions,
-              trailingSlash,
-              appDir,
-              basepath
-            }
-          : {
-              type,
-              input,
-              staticDir,
-              output,
-              ignorePath,
-              pageExtensions,
-              trailingSlash,
-              basepath
-            }
-      );
+        const result = fs.readFileSync(`${output}/$path.ts`, 'utf8');
+        const basepath = /-basepath$/.test(project.dir) ? '/foo/bar' : undefined;
+        const { filePath, text } = build(
+          type === 'nextjs'
+            ? {
+                type,
+                input,
+                staticDir,
+                output,
+                ignorePath,
+                pageExtensions,
+                trailingSlash,
+                appDir,
+                basepath
+              }
+            : {
+                type,
+                input,
+                staticDir,
+                output,
+                ignorePath,
+                pageExtensions,
+                trailingSlash,
+                basepath
+              }
+        );
 
-      expect(filePath).toBe(`${output}/$path.ts`);
-      expect(
-        text.replace(
-          new RegExp(
-            `${
-              /\\/.test(workingDir) ? `${workingDir.replace(/\\/g, '\\\\')}(/src)?` : workingDir
-            }/`,
-            'g'
-          ),
-          ''
-        )
-      ).toBe(result.replace(/\r/g, ''));
-    }
+        expect(filePath).toBe(`${output}/$path.ts`);
+        expect(
+          text.replace(
+            new RegExp(
+              `${
+                /\\/.test(workingDir) ? `${workingDir.replace(/\\/g, '\\\\')}(/src)?` : workingDir
+              }/`,
+              'g'
+            ),
+            ''
+          )
+        ).toBe(result.replace(/\r/g, ''));
+      });
+    });
   });
 });

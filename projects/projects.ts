@@ -10,34 +10,43 @@ export const projects = [
   { dir: 'nuxtjs-basepath', output: 'plugins/util', nodeVer: 14 },
   { dir: 'nuxtjs-no-slash', output: 'plugins/util', nodeVer: 14 },
   { dir: 'nuxtjs-src', output: 'client/plugins/util', nodeVer: 14 }
-].flatMap(
-  (
-    project
-  ): {
-    dir: string;
-    output: string | undefined;
-    enableStatic: boolean;
-    ignorePath: string | undefined;
-    nodeVer: number;
-  }[] => [
-    { ...project, output: undefined, enableStatic: true, ignorePath: undefined },
-    {
-      ...project,
-      output: `${project.output}/basic`,
-      enableStatic: false,
-      ignorePath: '.pathpidaignore'
-    },
-    {
-      ...project,
-      output: `${project.output}/static`,
-      enableStatic: true,
-      ignorePath: undefined
-    },
-    {
-      ...project,
-      output: `${project.output}/ignore`,
-      enableStatic: true,
-      ignorePath: '.pathpidaignore'
-    }
-  ]
+].map(
+  baseProject =>
+    [
+      baseProject.dir,
+      baseProject,
+      [
+        [
+          'undefined',
+          { ...baseProject, output: undefined, enableStatic: true, ignorePath: undefined }
+        ],
+        [
+          'basic',
+          {
+            ...baseProject,
+            output: `${baseProject.output}/basic`,
+            enableStatic: false,
+            ignorePath: '.pathpidaignore'
+          }
+        ],
+        [
+          'static',
+          {
+            ...baseProject,
+            output: `${baseProject.output}/static`,
+            enableStatic: true,
+            ignorePath: undefined
+          }
+        ],
+        [
+          'ignore',
+          {
+            ...baseProject,
+            output: `${baseProject.output}/ignore`,
+            enableStatic: true,
+            ignorePath: '.pathpidaignore'
+          }
+        ]
+      ]
+    ] as const
 );
