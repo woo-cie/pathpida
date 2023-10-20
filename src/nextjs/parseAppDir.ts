@@ -23,7 +23,7 @@ export const createMethods = (
       : ''
   }, hash: url${importName?.startsWith('Query') ? '' : '?'}.hash, path: \`${pathname
     .replace(/\[\[?\.\.\.(.*?)\]\]?/g, `\${$1?.join('/')}`)
-    .replace(/\[(.*?)\]/g, `\${$1}`)}\${buildSuffix(url)}\` })`;
+    .replace(/\[(.*?)\]/g, `\${$1}`)}\${buildSuffix(url)}\` as const })`;
 
 export const parseAppDir = (
   input: string,
